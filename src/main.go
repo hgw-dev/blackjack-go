@@ -1,9 +1,10 @@
 package main
 
 import (
-	"blackjack/game"
+	"blackjack/src/game"
 )
 
 func main() {
 	game.Start()
+	// game.Main()
 }

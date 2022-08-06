@@ -9,20 +9,17 @@ import (
 )
 
 var rankNameMap map[int]string
-
 var suitUnicodeMap map[string]string
-
 var deck []Card
 
 type Card struct {  
-    Suit  string
-	Rank  int
+    Suit    string
+	Rank    int
 }
 
 // Unicode for Cards
 // https://en.wikipedia.org/wiki/Playing_cards_in_Unicode#Playing_Cards_(block)
-func (c Card) Print() {
-	rankName := rankToName(c.Rank)
+func (c Card) GetCard() string {
 	rankValue := c.Rank
 	if (rankValue > 11){
 		rankValue += 1
@@ -33,10 +30,12 @@ func (c Card) Print() {
 	// base value as int + rank value
 	offsetUniCodePoint := string(uniCodePoint + rankValue)
 
+	return offsetUniCodePoint
+}
+func (c Card) PrintName() {
 	fmt.Printf(
-		"[%s ] %s of %s\n", 
-		offsetUniCodePoint,
-		strings.Title(rankName), 
+		"%s of %s\n", 
+		strings.Title(rankToName(c.Rank)), 
 		strings.Title(c.Suit),
 	)
 }
@@ -95,10 +94,18 @@ func Draw() (first Card){
 		err = errors.New("Out of cards!")
 	}
 		
-	if err == nil {
-		first.Print()
-	} else {
+	if err != nil {
 		fmt.Println(err)
 	}
 	return first
+}
+
+func DrawNFromDeck(numCards int) []Card {
+	var cards []Card
+
+	for i := 0; i < numCards; i++ {
+		cards = append(cards, Draw())
+	}
+
+	return cards
 }

@@ -1,3 +1,3 @@
-module blackjack/deck
+module blackjack/src/deck
 
 go 1.13
