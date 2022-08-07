@@ -2,11 +2,14 @@ package game
 
 import (
 	"blackjack/src/hand"
+	"blackjack/src/wallet"
 	"bufio"
 	"fmt"
 	"os"
 	"strings"
 )
+
+var playerWallet wallet.Wallet
 
 var playerHand hand.Hand
 var dealerHand hand.Hand
@@ -14,15 +17,21 @@ var dealerHand hand.Hand
 var notBust bool
 var activeGame bool
 var playerQuit bool
+var emptyWallet bool
 
 func init() {
+	playerWallet = wallet.New()
 	resetScreen()
 
-	fmt.Println("Welcome to the Blackjack table!")
+	fmt.Printf(
+		"*You approach a table holding a %s wallet with %s doubloons*\n",
+		playerWallet.Description, playerWallet.GetAmount(),
+	)
+	fmt.Println("\"Welcome to the Blackjack table!\"")
 }
 
 func Start() {
-	for playerQuit == false {
+	for playerQuit == false && emptyWallet == false {
 		for {
 			reader := bufio.NewScanner(os.Stdin)
 			fmt.Println("\nWould you like to play a hand?")
@@ -43,10 +52,13 @@ func Start() {
 }
 
 func playHand() {
+	placeBet()
+
 	hand.ShuffleDeck()
 
 	notBust = true
 	activeGame = true
+	emptyWallet = false
 
 	dealerHand = hand.DealDealer()
 	dealerHand.Print()
@@ -54,17 +66,88 @@ func playHand() {
 	playerHand = hand.DealPlayer()
 	playerHand.Print()
 
+	if playerHand.Value == 21 {
+		fmt.Println("BLACKJACK")
+		activeGame = false
+		resolveHand()
+		return
+	}
+
 	playRound()
 
-	if playerQuit == false {
-		hand.ResolveHand(playerHand, dealerHand)
+	if playerQuit == true {
+		fmt.Printf("*You run away from the table, leaving your %s wallet and your %s doubloons*",
+			playerWallet.Description, playerWallet.GetAmount(),
+		)
 	} else {
-		fmt.Println("*You run away from the table, leaving your wallet*")
+		resolveHand()
+
+		if emptyWallet == true {
+			fmt.Printf("*You pretend to dig in your wallet for more doubloons, before meakly walking away*")
+		}
+	}
+}
+
+func placeBet() {
+	promptForBet := true
+	var amount uint64 = 0
+	for promptForBet {
+		reader := bufio.NewScanner(os.Stdin)
+		fmt.Println("\nPlace your bet")
+
+		fmt.Print(playerWallet.GetAmount() + " ")
+		prompt()
+
+		reader.Scan()
+
+		text := strings.ToLower(strings.TrimSpace(reader.Text()))
+		var err error
+		amount, err = wallet.AmountStringToUint(text)
+
+		if err != nil {
+			fmt.Println("\nInvalid bet! Try again")
+		} else {
+			promptForBet = false
+		}
+	}
+	playerWallet = playerWallet.PlaceBet(uint64(amount))
+}
+
+func resolveHand() {
+	dealerHand.IsHidden = false
+	dealerHand.Value = dealerHand.GetValue()
+
+	dealerHand.Print()
+	playerHand.Print()
+	fmt.Println("")
+
+	dealerBust := dealerHand.Value > 21
+	playerBust := playerHand.Value > 21
+	playerBeatDealer := playerHand.Value > dealerHand.Value
+
+	if playerBust == false && ((playerBeatDealer && dealerBust == false) || dealerBust) {
+		fmt.Printf("<<< YOU WIN %s doubloons! >>>\n", playerWallet.GetCurrentBet())
+		fmt.Println("*Dopamine surges throughout your brain. You enjoy gambling.*")
+		fmt.Println("-----")
+
+		playerWallet = playerWallet.BetWon()
+	} else {
+		fmt.Printf("<<< YOU LOSE %s doubloons! LOSER! >>>\n", playerWallet.GetCurrentBet())
+		fmt.Println("*You have an overwhelming urge to play another hand*")
+		fmt.Println("-----")
+
+		var emptyWalletError error
+		playerWallet, emptyWalletError = playerWallet.BetLost()
+		if emptyWalletError != nil {
+			fmt.Println(emptyWalletError)
+			emptyWallet = true
+		}
 	}
 }
 
 func resetScreen() {
-	fmt.Println("\033[2J")
+	fmt.Println("\n\n\n")
+	// fmt.Println("\033[2J")
 }
 
 func prompt() {
@@ -177,12 +260,8 @@ func dealerTurn() {
 		dealerValue := dealerHand.Value
 
 		if dealerValue >= 17 {
-			fmt.Println("> stand")
-			fmt.Println("\"I'll stand...\"")
 			dealerActiveGame = false
 		} else {
-			fmt.Println("> hit")
-			fmt.Println("\"Hit me!\"\n")
 			dealerHand, _ = dealerHand.Hit()
 
 			dealerHand.Print()

@@ -39,13 +39,7 @@ func dealHand(dealer bool) Hand {
 }
 
 func DealPlayer() Hand {
-	h := dealHand(false)
-
-	if h.Value == 21 {
-		fmt.Println("BLACKJACK")
-	}
-
-	return h
+	return dealHand(false)
 }
 
 func DealDealer() Hand {
@@ -123,20 +117,4 @@ func (h Hand) Hit() (Hand, error) {
 		err = errors.New("BUST!")
 	}
 	return h, err
-}
-
-func ResolveHand(playerHand Hand, dealerHand Hand) {
-	dealerHand.Print()
-	playerHand.Print()
-	fmt.Println("")
-
-	if playerHand.Value > dealerHand.Value && playerHand.Value <= 21 {
-		fmt.Println("<<< YOU WIN! >>>")
-		fmt.Println("*Dopamine surges throughout your brain. You enjoy gambling.*")
-		fmt.Println("-----")
-	} else {
-		fmt.Println("<<< YOU LOSE! LOSER! >>>")
-		fmt.Println("*You have an overwhelming urge to play another hand*")
-		fmt.Println("-----")
-	}
 }

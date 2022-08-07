@@ -20,6 +20,8 @@ type Cards []Card
 var deck Cards
 
 func init() {
+	rand.Seed(time.Now().UnixNano())
+
 	rankNameMap = map[int]string{
 		1: "ace",
 		2: "two", 3: "three", 4: "four",
@@ -84,7 +86,6 @@ func ShuffleDeck() {
 	}
 
 	// shuffle
-	rand.Seed(time.Now().UnixNano())
 	for i := len(deck) - 1; i > 0; i-- {
 		j := rand.Intn(i + 1)
 		deck[i], deck[j] = deck[j], deck[i]
