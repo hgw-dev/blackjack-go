@@ -34,7 +34,13 @@ func dealHand(dealer bool) Hand{
 }
 
 func DealPlayer() Hand{
-	return dealHand(false)
+	h := dealHand(false)
+
+	if h.Value == 21 {
+		fmt.Println("BLACKJACK")
+	}
+
+	return h
 }
 
 func DealDealer() Hand{
@@ -42,8 +48,7 @@ func DealDealer() Hand{
 }
 
 func (h Hand) printDealer(hidden bool) {
-	owner := "Dealer"
-	fmt.Printf("%s ", owner)
+	fmt.Print("[Dealer] ")
 
 	startIndex := 0
 	if h.IsHidden {
@@ -56,10 +61,9 @@ func (h Hand) printDealer(hidden bool) {
 	}
 
 	fmt.Printf(" showing %d\n", h.Value)
-	fmt.Printf("\n")
 }
 func (h Hand) printPlayer() {
-	fmt.Printf("Player ")
+	fmt.Print("[Player] ")
     for _, item := range h.Cards {
 		fmt.Printf(
 			"%s ", 
@@ -70,7 +74,7 @@ func (h Hand) printPlayer() {
 }
 func (h Hand) Print() {
 	if h.IsDealer {
-		h.printDealer(true)
+		h.printDealer(h.IsHidden)
 	} else {
 		h.printPlayer()
 	}
@@ -101,11 +105,6 @@ func (h Hand) getValue() int {
 		value = value - 10 
 		aceCount -= 1
 	}
-
-	// it's only blackjack if it's the first two cards dealt
-	if len(h.Cards) == 2 && value == 21 && h.IsHidden == false {
-		fmt.Println("BLACKJACK")
-	}
 	
     return value
 }
@@ -122,6 +121,15 @@ func (h Hand) Hit() (Hand, error) {
 }
 
 func ResolveHand(playerHand Hand, dealerHand Hand) {
-	fmt.Printf("Player Value: %d\n", playerHand.getValue())
-	fmt.Printf("Dealer Value: %d\n", dealerHand.getValue())
+	dealerHand.Print()
+	playerHand.Print()
+	fmt.Println("")
+
+	if playerHand.Value > dealerHand.Value && playerHand.Value <= 21 {
+		fmt.Println("YOU WIN!")
+		fmt.Println("*Dopamine surges throughout your brain. You enjoy gambling.*")
+	} else {
+		fmt.Println("YOU LOSE! LOSER!")
+		fmt.Println("*You have an overwhelming urge to play another hand*")
+	}
 }

@@ -13,10 +13,14 @@ var dealerHand hand.Hand
 
 var notBust bool
 var activeGame bool
+var playerQuit bool
 
 func init(){
+    resetScreen()
+    
     notBust = true
     activeGame = true
+    playerQuit = false
 
 	fmt.Println("Welcome to the Blackjack table!")
 	fmt.Println("Shuffling...\n")
@@ -31,7 +35,15 @@ func Start(){
 
     playHand()
 
-	hand.ResolveHand(playerHand, dealerHand)
+    if playerQuit == false {
+        hand.ResolveHand(playerHand, dealerHand)
+    } else {
+        fmt.Println("*You run away from the table, leaving your wallet*")
+    }
+}
+
+func resetScreen() {
+    fmt.Println("\033[2J")
 }
 
 func prompt() {
@@ -39,11 +51,13 @@ func prompt() {
 }
 
 func stand() {
-    fmt.Println("\"I'll stand...\"\n")
+    resetScreen()
+    fmt.Println("\"I'll stand...\"")
     activeGame = false
 }
 
 func hit() {
+    resetScreen()
     fmt.Println("\"Hit me!\"\n")
     var bustError error
     playerHand, bustError = playerHand.Hit()
@@ -68,6 +82,7 @@ func printUnknown(text string) {
 }
  
 func displayHelp() {
+    resetScreen()
     fmt.Println("The Goal:")
     fmt.Println("\tBeat the dealer")
     fmt.Println("\tby getting a score as close to 21 as possible,") 
@@ -83,6 +98,14 @@ func handleInvalidCmd(text string) {
 }
  
 func playHand() {
+    playerTurn()
+
+    if playerQuit == false {
+        dealerTurn()
+    }
+}
+
+func playerTurn() {
     commands := map[string]interface{}{
         "help": displayHelp,
         "stand": stand,
@@ -101,6 +124,7 @@ func playHand() {
             strings.EqualFold("e", text) || 
             strings.EqualFold("quit", text) || 
             strings.EqualFold("q", text) ){
+            playerQuit = true
             return
         } else {
             handleInvalidCmd(text)
@@ -111,4 +135,14 @@ func playHand() {
         prompt()
     }
     fmt.Println()
+}
+
+func dealerTurn(){
+    fmt.Println("\n-----")
+    fmt.Println("Dealer's Turn")
+
+    // reveal face down card
+    dealerHand.IsHidden = false
+    dealerHand.Print()
+    fmt.Println("-----\n")
 }
