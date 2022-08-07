@@ -10,12 +10,14 @@ import (
 
 var rankNameMap map[int]string
 var suitUnicodeMap map[string]string
-var deck []Card
 
 type Card struct {  
     Suit    string
 	Rank    int
 }
+type Cards []Card
+
+var deck Cards
 
 // Unicode for Cards
 // https://en.wikipedia.org/wiki/Playing_cards_in_Unicode#Playing_Cards_(block)
@@ -93,16 +95,14 @@ func Draw() (first Card){
 	} else {
 		err = errors.New("Out of cards!")
 	}
-		
+
 	if err != nil {
 		fmt.Println(err)
 	}
 	return first
 }
 
-func DrawNFromDeck(numCards int) []Card {
-	var cards []Card
-
+func (cards Cards) DrawNCards(numCards int) Cards {
 	for i := 0; i < numCards; i++ {
 		cards = append(cards, Draw())
 	}
