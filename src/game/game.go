@@ -83,6 +83,7 @@ func hit() {
 	var bustError error
 	playerHand, bustError = playerHand.Hit()
 
+	dealerHand.Print()
 	playerHand.Print()
 	if bustError != nil {
 		fmt.Println(bustError)
@@ -134,6 +135,8 @@ func playerTurn() {
 		"hit":   hit,
 		"h":     hit,
 	}
+	fmt.Println("\n<Players's Turn>")
+
 	reader := bufio.NewScanner(os.Stdin)
 	prompt()
 	for {
@@ -151,6 +154,7 @@ func playerTurn() {
 			handleInvalidCmd(text)
 		}
 		if activeGame == false {
+			fmt.Println("</Players's Turn>")
 			return
 		}
 		prompt()
@@ -159,11 +163,33 @@ func playerTurn() {
 }
 
 func dealerTurn() {
-	fmt.Println("\n-----")
-	fmt.Println("Dealer's Turn")
+	fmt.Println("\n<Dealer's Turn>")
 
 	// reveal face down card
 	dealerHand.IsHidden = false
+	dealerActiveGame := true
+
+	dealerHand.Value = dealerHand.GetValue()
 	dealerHand.Print()
-	fmt.Println("-----\n")
+	fmt.Println("")
+
+	for dealerActiveGame {
+		dealerValue := dealerHand.Value
+
+		if dealerValue >= 17 {
+			fmt.Println("> stand")
+			fmt.Println("\"I'll stand...\"")
+			dealerActiveGame = false
+		} else {
+			fmt.Println("> hit")
+			fmt.Println("\"Hit me!\"\n")
+			dealerHand, _ = dealerHand.Hit()
+
+			dealerHand.Print()
+			if dealerHand.Value >= 21 {
+				dealerActiveGame = false
+			}
+		}
+	}
+	fmt.Println("</Dealer's Turn>\n")
 }

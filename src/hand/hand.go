@@ -1,10 +1,10 @@
 package hand
 
 import (
+	"blackjack/src/deck"
 	"errors"
 	"fmt"
 )
-import "blackjack/src/deck"
 
 type Hand struct {
 	Cards    deck.Cards
@@ -34,7 +34,7 @@ func dealHand(dealer bool) Hand {
 	}
 
 	h.Cards = h.Cards.DrawNCards(2)
-	h.Value = h.getValue()
+	h.Value = h.GetValue()
 	return h
 }
 
@@ -53,7 +53,7 @@ func DealDealer() Hand {
 }
 
 func (h Hand) printDealer(hidden bool) {
-	fmt.Print("[Dealer] ")
+	fmt.Print("\t\t[Dealer] ")
 
 	startIndex := 0
 	if h.IsHidden {
@@ -68,7 +68,7 @@ func (h Hand) printDealer(hidden bool) {
 	fmt.Printf(" showing %d\n", h.Value)
 }
 func (h Hand) printPlayer() {
-	fmt.Print("[Player] ")
+	fmt.Print("\t\t[Player] ")
 	for _, item := range h.Cards {
 		fmt.Printf(
 			"%s ",
@@ -84,12 +84,12 @@ func (h Hand) Print() {
 		h.printPlayer()
 	}
 }
-func (h Hand) getValue() int {
+func (h Hand) GetValue() int {
 	value := 0
 	aceCount := 0
 
 	startIndex := 0
-	if h.IsHidden {
+	if h.IsHidden == true {
 		startIndex = 1
 	}
 
@@ -116,7 +116,7 @@ func (h Hand) getValue() int {
 
 func (h Hand) Hit() (Hand, error) {
 	h.Cards = h.Cards.DrawNCards(1)
-	h.Value = h.getValue()
+	h.Value = h.GetValue()
 
 	var err error
 	if h.Value > 21 {
@@ -131,11 +131,11 @@ func ResolveHand(playerHand Hand, dealerHand Hand) {
 	fmt.Println("")
 
 	if playerHand.Value > dealerHand.Value && playerHand.Value <= 21 {
-		fmt.Println("YOU WIN!")
+		fmt.Println("<<< YOU WIN! >>>")
 		fmt.Println("*Dopamine surges throughout your brain. You enjoy gambling.*")
 		fmt.Println("-----")
 	} else {
-		fmt.Println("YOU LOSE! LOSER!")
+		fmt.Println("<<< YOU LOSE! LOSER! >>>")
 		fmt.Println("*You have an overwhelming urge to play another hand*")
 		fmt.Println("-----")
 	}
