@@ -1,16 +1,16 @@
 package hand
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 )
 import "blackjack/src/deck"
 
 type Hand struct {
-    Cards     deck.Cards
-	Value     int
-    IsDealer  bool
-	IsHidden  bool
+	Cards    deck.Cards
+	Value    int
+	IsDealer bool
+	IsHidden bool
 }
 
 var cardBackUnicode string
@@ -19,11 +19,16 @@ func init() {
 	cardBackUnicode = "\U0001F0A0"
 }
 
-func dealHand(dealer bool) Hand{
+// this is just a lazy way to give game.go access to this deck.go function
+func ShuffleDeck() {
+	deck.ShuffleDeck()
+}
+
+func dealHand(dealer bool) Hand {
 	var cards deck.Cards = []deck.Card{}
 
 	h := Hand{
-		Cards: cards,
+		Cards:    cards,
 		IsDealer: dealer,
 		IsHidden: dealer,
 	}
@@ -33,7 +38,7 @@ func dealHand(dealer bool) Hand{
 	return h
 }
 
-func DealPlayer() Hand{
+func DealPlayer() Hand {
 	h := dealHand(false)
 
 	if h.Value == 21 {
@@ -43,7 +48,7 @@ func DealPlayer() Hand{
 	return h
 }
 
-func DealDealer() Hand{
+func DealDealer() Hand {
 	return dealHand(true)
 }
 
@@ -55,8 +60,8 @@ func (h Hand) printDealer(hidden bool) {
 		startIndex = 1
 		fmt.Printf("%s ", cardBackUnicode)
 	}
-	
-    for _, item := range h.Cards[startIndex:] {
+
+	for _, item := range h.Cards[startIndex:] {
 		fmt.Printf("%s ", item.GetCard())
 	}
 
@@ -64,9 +69,9 @@ func (h Hand) printDealer(hidden bool) {
 }
 func (h Hand) printPlayer() {
 	fmt.Print("[Player] ")
-    for _, item := range h.Cards {
+	for _, item := range h.Cards {
 		fmt.Printf(
-			"%s ", 
+			"%s ",
 			item.GetCard(),
 		)
 	}
@@ -88,7 +93,7 @@ func (h Hand) getValue() int {
 		startIndex = 1
 	}
 
-    for _, item := range h.Cards[startIndex:] {
+	for _, item := range h.Cards[startIndex:] {
 		rank := item.Rank
 		if rank > 10 {
 			rank = 10
@@ -96,17 +101,17 @@ func (h Hand) getValue() int {
 		if rank == 1 {
 			aceCount += 1
 			rank = 11
-		}		
+		}
 		value += rank
-    }
+	}
 
 	// if we go bust, we want the ace to = 1
 	for value > 21 && aceCount > 0 {
-		value = value - 10 
+		value = value - 10
 		aceCount -= 1
 	}
-	
-    return value
+
+	return value
 }
 
 func (h Hand) Hit() (Hand, error) {
@@ -128,8 +133,10 @@ func ResolveHand(playerHand Hand, dealerHand Hand) {
 	if playerHand.Value > dealerHand.Value && playerHand.Value <= 21 {
 		fmt.Println("YOU WIN!")
 		fmt.Println("*Dopamine surges throughout your brain. You enjoy gambling.*")
+		fmt.Println("-----")
 	} else {
 		fmt.Println("YOU LOSE! LOSER!")
 		fmt.Println("*You have an overwhelming urge to play another hand*")
+		fmt.Println("-----")
 	}
 }
